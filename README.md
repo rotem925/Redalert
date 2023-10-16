@@ -77,7 +77,7 @@ services:
 ```yaml
   - platform: mqtt
     name: "Red Alert"
-    state_topic: "/redalert/"
+    state_topic: "/redalert/data"
     # unit_of_measurement: '%'
     icon: fas:broadcast-tower
     value_template: "{{ value_json }}"
@@ -88,7 +88,7 @@ services:
 ```yaml
   - platform: mqtt
     name: "Red Alert"
-    state_topic: "/redalert/"
+    state_topic: "/redalert/data"
     # unit_of_measurement: '%'
     icon: fas:broadcast-tower
     value_template: "{{ value_json.data }}"
@@ -101,6 +101,5 @@ services:
     name: "Red Alert"
     state_topic: "/redalert/alarm"
     icon: fas:broadcast-tower
-    value_template: "{{ value_json }}"
     qos: 1
 ```
