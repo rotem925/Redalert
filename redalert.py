@@ -35,7 +35,7 @@ http = urllib3.PoolManager()
 _headers = {'Referer':'https://www.oref.org.il/','User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36",'X-Requested-With':'XMLHttpRequest'}
 url= 'https://www.oref.org.il/WarningMessages/alert/alerts.json'
 if debug == 'True':
-   url = 'http://localhost/alerts.json'
+   url = 'http://localhost:3000/alerts.json'
 
 #Check Connection Status
 def on_connect(client, userdata, flags, rc):
@@ -95,8 +95,9 @@ if len(NOTIFIERS)!=0:
         apobj.add(job)
 
 def alarm_on(data):
-    client.publish(MQTT_TOPIC + "/data",str(data["data"]),qos=0,retain=False)
+    client.publish(MQTT_TOPIC + "/data",json.dumps(data,ensure_ascii=False),qos=0,retain=False)
     client.publish(MQTT_TOPIC,'on',qos=0,retain=False)
+    client.publish(MQTT_TOPIC + "/alarm",'on',qos=0,retain=False)
     if len(NOTIFIERS)!=0:
         logger.info("Alerting using Notifires")
         apobj.notify(
@@ -108,6 +109,7 @@ def alarm_on(data):
 def alarm_off():
     client.publish(MQTT_TOPIC + "/alarm",'off',qos=0,retain=False)
     client.publish(MQTT_TOPIC,"No active alerts",qos=0,retain=False)
+    client.publish(MQTT_TOPIC + "/data",'',qos=0,retain=False)
 
 def is_test_alert(alert):
     # if includes, all alerts are treated as not test
@@ -116,25 +118,29 @@ def is_test_alert(alert):
 def monitor():
   #start the timer
   threading.Timer(1, monitor).start()
-  #Check for Alerts
-  r = http.request('GET',url,headers=_headers)
-  r.encoding = 'utf-8'
-  alert_data = r.data.decode('utf-8-sig').strip("/n").strip()
-  #Check if data contains alert data
   try:
-      if alert_data != '':
-          alert = json.loads(alert_data)
-          if region in alert["data"] or region=="*":
-              if alert["id"] not in alerts and not is_test_alert(alert):
-                  alerts.append(alert["id"])
-                  alarm_on(alert)
-                  logger.info(str(alert))
-      else:
-         alarm_off()
+    #Check for Alerts
+    r = http.request('GET',url,headers=_headers)
+    r.encoding = 'utf-8'
+    alert_data = r.data.decode('utf-8-sig').strip("/n").strip()
+    logger.info(alert_data)
+    #Check if data contains alert data
+    try:
+        if alert_data != '':
+            alert = json.loads(alert_data)
+            if region in alert["data"] or region=="*":
+                if alert["id"] not in alerts and not is_test_alert(alert):
+                    alerts.append(alert["id"])
+                    alarm_on(alert)
+                    logger.info(json.dumps(alert,ensure_ascii=False))
+        else:
+            alarm_off()
+    except Exception as ex:
+            logger.error(str(ex))
+    finally:
+        r.release_conn()
   except Exception as ex:
-         logger.error(str(ex))
-  finally:
-     r.release_conn()
+            logger.error(str(ex))
 
 if __name__ == '__main__':
    monitor()
