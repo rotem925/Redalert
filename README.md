@@ -84,17 +84,6 @@ services:
     qos: 1
 ```
 
-#### Get json with alert areas only
-```yaml
-  - platform: mqtt
-    name: "Red Alert"
-    state_topic: "/redalert/data"
-    # unit_of_measurement: '%'
-    icon: fas:broadcast-tower
-    value_template: "{{ value_json.data }}"
-    qos: 1
-```
-
 #### Alaram state (Value will be on/off)
 ```yaml
   - platform: mqtt
