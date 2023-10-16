@@ -5,7 +5,7 @@ Ubuntu based image running python script that reads json from [Oref Website](htt
 and publishes it over MQTT Protocol.
 
 ## Base Image
-`From ubuntu:18.04` described [here](https://hub.docker.com/_/ubuntu).
+`From ubuntu:22.04` described [here](https://hub.docker.com/_/ubuntu).
 
 
 ## 18/05/2021 Major update
