@@ -109,7 +109,7 @@ def alarm_on(data):
 def alarm_off():
     client.publish(MQTT_TOPIC + "/alarm",'off',qos=0,retain=False)
     client.publish(MQTT_TOPIC,"No active alerts",qos=0,retain=False)
-    client.publish(MQTT_TOPIC + "/data",'',qos=0,retain=False)
+    client.publish(MQTT_TOPIC + "/data",'{}',qos=0,retain=False)
 
 def is_test_alert(alert):
     # if includes, all alerts are treated as not test
